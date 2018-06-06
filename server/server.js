@@ -37,13 +37,18 @@ io.on('connection', (socket) => {
     })
 
     socket.on('createMessage', (message, callback) => {
-        console.log('createMessage', message);
-        io.emit('newMessage', generateMessage(message.from, message.text));
+        let user = users.getUser(socket.id)
+        if(user && isRealString(message.text)){
+            io.to(user.room).emit('newMessage', generateMessage(user.name, message.text));
+        }
         callback('this is from the server');
     })
 
-    socket.on('createLocationMessage', (data) => {
-        io.emit('newLocationMessage', generateLocationMessage(data.from, { latitude: data.latitude, longitude: data.longitude }))
+    socket.on('createLocationMessage', (message,callback) => {
+        let user = users.getUser(socket.id)
+        if(user){
+            io.to(user.room).emit('newLocationMessage', generateLocationMessage(user.name, { latitude: message.latitude, longitude: message.longitude }))
+        }
     })
 
     socket.on('disconnect', () => {

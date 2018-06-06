@@ -30,7 +30,7 @@ socket.on('connect', function () {
 })
 
 socket.on('updateUserList', (users) => {
-    console.log('Users List',users)
+    console.log('Users List', users)
     var ol = jQuery('<ol></ol>')
     users.forEach(function (user) {
         ol.append(jQuery('<li></li>').text(user))
@@ -58,7 +58,7 @@ socket.on('newLocationMessage', function (message) {
     var formatedTime = moment(message.createdAt).format('h:m a')
     var template = jQuery('#location-message-template').html();
     var html = Mustache.render(template, {
-        text: message.url,
+        url: message.url,
         from: message.from,
         createdAt: moment(message.createdAt).format('h:m a')
     });
@@ -71,9 +71,7 @@ jQuery('#message-form')
     .on('submit', function (e) {
         e.preventDefault();
         var messageTextBox = jQuery('[name=message]');
-        var params = jQuery.deparam(window.location.search);
         socket.emit('createMessage', {
-            from: params.name,
             text: messageTextBox.val()
         }, function () {
             messageTextBox.val('')
@@ -91,6 +89,7 @@ locationButton.on('click', function () {
     navigator.geolocation.getCurrentPosition(function (position) {
         locationButton.removeAttr('disabled').text('Send Location');
         var params = jQuery.deparam(window.location.search);
+        console.log(params, position)
         socket.emit('createLocationMessage', {
             from: params.name,
             latitude: position.coords.latitude,
