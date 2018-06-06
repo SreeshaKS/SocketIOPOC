@@ -22,11 +22,20 @@ socket.on('connect', function () {
     socket.emit('join', params, function (err) {
         if (err) {
             alert(err)
-            window.location.href='/';
+            window.location.href = '/';
         } else {
             console.log('No error')
         }
     })
+})
+
+socket.on('updateUserList', (users) => {
+    console.log('Users List',users)
+    var ol = jQuery('<ol></ol>')
+    users.forEach(function (user) {
+        ol.append(jQuery('<li></li>').text(user))
+    });
+    jQuery('#users').html(ol);
 })
 
 socket.on('disconnect', function () {
@@ -62,8 +71,9 @@ jQuery('#message-form')
     .on('submit', function (e) {
         e.preventDefault();
         var messageTextBox = jQuery('[name=message]');
+        var params = jQuery.deparam(window.location.search);
         socket.emit('createMessage', {
-            from: 'User',
+            from: params.name,
             text: messageTextBox.val()
         }, function () {
             messageTextBox.val('')
@@ -80,7 +90,9 @@ locationButton.on('click', function () {
 
     navigator.geolocation.getCurrentPosition(function (position) {
         locationButton.removeAttr('disabled').text('Send Location');
+        var params = jQuery.deparam(window.location.search);
         socket.emit('createLocationMessage', {
+            from: params.name,
             latitude: position.coords.latitude,
             longitude: position.coords.longitude
         })
